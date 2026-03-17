@@ -138,6 +138,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. Smith Care Services"
                   value={form.business_name}
                   onChange={(e) => update("business_name", e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && nextStep()}
                   autoFocus
                 />
                 <p className="text-xs text-[#64748B]">
@@ -156,6 +157,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. Sarah Smith"
                   value={form.contact_name}
                   onChange={(e) => update("contact_name", e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && nextStep()}
                   autoFocus
                 />
               </div>
@@ -167,6 +169,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. 0412 345 678"
                   value={form.phone}
                   onChange={(e) => update("phone", e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && nextStep()}
                 />
               </div>
             </div>
@@ -196,6 +199,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. 51 824 753 556"
                   value={form.abn}
                   onChange={(e) => handleABNChange(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   maxLength={14}
                 />
                 {form.abn.replace(/\s/g, "").length === 11 && (

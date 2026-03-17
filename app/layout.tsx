@@ -9,6 +9,19 @@ export const metadata: Metadata = {
     icon: "/solocare_icon.svg",
     apple: "/solocare_icon.svg",
   },
+  openGraph: {
+    title: "SoloCare — NDIS Compliance Made Simple",
+    description: "Audit-ready NDIS compliance for Australian independent support workers. Policies, documents, incidents — sorted in under an hour.",
+    url: "https://solocare.com.au",
+    siteName: "SoloCare",
+    locale: "en_AU",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "SoloCare — NDIS Compliance Made Simple",
+    description: "Audit-ready NDIS compliance for Australian independent support workers.",
+  },
 };
 
 export default function RootLayout({

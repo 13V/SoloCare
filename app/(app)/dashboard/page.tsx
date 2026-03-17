@@ -114,6 +114,28 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Daily quick actions */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <Link href="/notes/new" className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 hover:border-[#1E3A5F]/40 hover:shadow-sm transition-all group">
+          <div className="bg-[#1E3A5F]/8 p-2 rounded-lg shrink-0 group-hover:bg-[#1E3A5F]/12 transition-colors">
+            <FileText className="h-4 w-4 text-[#1E3A5F]" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[#0F172A]">Add Note</p>
+            <p className="text-xs text-slate-400 truncate">Progress note</p>
+          </div>
+        </Link>
+        <Link href="/shifts/new" className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 hover:border-[#1E3A5F]/40 hover:shadow-sm transition-all group">
+          <div className="bg-[#1E3A5F]/8 p-2 rounded-lg shrink-0 group-hover:bg-[#1E3A5F]/12 transition-colors">
+            <Clock className="h-4 w-4 text-[#1E3A5F]" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[#0F172A]">Log Shift</p>
+            <p className="text-xs text-slate-400 truncate">Hours &amp; earnings</p>
+          </div>
+        </Link>
+      </div>
+
       {/* Expiry alert strip */}
       {expiringSoon.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
