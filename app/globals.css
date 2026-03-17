@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 213 52% 24%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 213 52% 24%;
+    --radius: 0.5rem;
+    --font-heading: 'Fraunces', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent iOS zooming on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: inherit !important;
+    }
+  }
+}
+
+@layer components {
+  /* Distinctive heading style using serif font */
+  .heading-display {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Subtle noise texture overlay */
+  .texture-noise {
+    position: relative;
+  }
+  .texture-noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Warm glow effect for CTAs */
+  .glow-warm {
+    box-shadow: 0 0 0 1px rgba(234, 124, 60, 0.1),
+                0 4px 16px -2px rgba(234, 124, 60, 0.15);
+  }
+
+  /* Card with subtle depth */
+  .card-elevated {
+    @apply bg-white rounded-xl border border-slate-200/80;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04),
+                0 6px 24px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-elevated:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
+                0 8px 32px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Smooth link underline animation */
+  .link-underline {
+    @apply relative;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-[1.5px] bg-current;
+    transition: width 0.25s ease;
+  }
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .status-valid {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+  .status-expiring {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+  .status-expired {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+  .status-missing {
+    @apply bg-slate-50 text-slate-500 border-slate-200;
+  }
+}
+
+/* Print styles */
+@media print {
+  nav, header, .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+}
