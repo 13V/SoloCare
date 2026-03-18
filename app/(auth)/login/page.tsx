@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -21,16 +21,10 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+function OAuthHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
-  // Handle OAuth code that lands here instead of /auth/callback
   useEffect(() => {
     const code = searchParams.get("code");
     if (!code) return;
@@ -46,6 +40,17 @@ export default function LoginPage() {
       router.push("/dashboard");
     });
   }, [searchParams, router]);
+
+  return null;
+}
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -93,6 +98,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 py-8 sm:py-12">
+      <Suspense><OAuthHandler /></Suspense>
       <div className="w-full max-w-sm sm:max-w-md">
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 mb-4">
