@@ -46,7 +46,7 @@ export default function TermsPage() {
             <h2 className="text-base font-semibold text-[#0F172A] mb-3">4. Subscription and billing</h2>
             <p>SoloCare is a paid subscription service. Pricing is displayed on the subscribe page. Payments are processed securely by Stripe. We do not store your card details.</p>
             <p className="mt-2">Subscriptions renew automatically unless cancelled before the renewal date. You can cancel at any time from your account settings.</p>
-            <p className="mt-2">We offer a 30-day money-back guarantee on your first payment. Contact us at <a href="mailto:support@solocare.com.au" className="text-[#1E3A5F] hover:underline">support@solocare.com.au</a> to request a refund within 30 days of your first charge.</p>
+            <p className="mt-2">We offer a 30-day money-back guarantee on your first payment. Contact us at <a href="mailto:support@solocare.au" className="text-[#1E3A5F] hover:underline">support@solocare.au</a> to request a refund within 30 days of your first charge.</p>
           </section>
 
           <section>
@@ -81,7 +81,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-semibold text-[#0F172A] mb-3">10. Contact</h2>
-            <p>Questions? Email us at <a href="mailto:support@solocare.com.au" className="text-[#1E3A5F] hover:underline">support@solocare.com.au</a>.</p>
+            <p>Questions? Email us at <a href="mailto:support@solocare.au" className="text-[#1E3A5F] hover:underline">support@solocare.au</a>.</p>
             <p className="mt-2">These terms are governed by the laws of South Australia, Australia.</p>
           </section>
 

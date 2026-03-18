@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://solocare.com.au";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://solocare.au";
 
 function getDaysUntil(dateStr: string): number {
   const today = new Date();
@@ -63,7 +63,7 @@ function buildEmailHtml(name: string, businessName: string, docs: { document_nam
     <tr>
       <td style="padding: 20px 32px; border-top: 1px solid #f1f5f9; background: #f8fafc;">
         <p style="margin: 0; color: #94a3b8; font-size: 12px;">
-          SoloCare · NDIS Compliance · solocare.com.au<br>
+          SoloCare · NDIS Compliance · solocare.au<br>
           You&apos;re receiving this because you have a SoloCare account.
           <a href="${siteUrl}/settings" style="color: #64748b;">Manage notifications</a>
         </p>
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
     if (relevant.length === 0) continue;
 
     const { error } = await resend.emails.send({
-      from: "SoloCare <reminders@solocare.com.au>",
+      from: "SoloCare <reminders@solocare.au>",
       to: user.email,
       subject: `⚠️ ${relevant.length} document${relevant.length > 1 ? "s" : ""} expiring soon — action required`,
       html: buildEmailHtml(name, businessName, relevant),

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SoloCare — NDIS Compliance Made Simple",
     description: "Audit-ready NDIS compliance for Australian independent support workers. Policies, documents, incidents — sorted in under an hour.",
-    url: "https://solocare.com.au",
+    url: "https://solocare.au",
     siteName: "SoloCare",
     locale: "en_AU",
     type: "website",

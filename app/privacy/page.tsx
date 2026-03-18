@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#0F172A] mb-3">1. Who we are</h2>
             <p>SoloCare is operated by Lumen ADL ABN [INSERT ABN], Adelaide, South Australia. We are subject to the Australian Privacy Act 1988 and the Australian Privacy Principles (APPs).</p>
-            <p className="mt-2">If you have any privacy questions, contact us at <a href="mailto:privacy@solocare.com.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.com.au</a>.</p>
+            <p className="mt-2">If you have any privacy questions, contact us at <a href="mailto:privacy@solocare.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.au</a>.</p>
           </section>
 
           <section>
@@ -74,13 +74,13 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#0F172A] mb-3">6. Data security</h2>
             <p>All data is encrypted in transit (TLS) and at rest. Access to the database is restricted and logged. We use Row Level Security in Supabase so your data is only accessible to your account.</p>
-            <p className="mt-2">Despite these measures, no system is 100% secure. If you believe your account has been compromised, contact us immediately at <a href="mailto:security@solocare.com.au" className="text-[#1E3A5F] hover:underline">security@solocare.com.au</a>.</p>
+            <p className="mt-2">Despite these measures, no system is 100% secure. If you believe your account has been compromised, contact us immediately at <a href="mailto:security@solocare.au" className="text-[#1E3A5F] hover:underline">security@solocare.au</a>.</p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-[#0F172A] mb-3">7. Data retention and deletion</h2>
             <p>Your data is retained for as long as your account is active. If you cancel your account, your data is retained for 30 days so you can export it, then permanently deleted.</p>
-            <p className="mt-2">To request deletion of your account and data, email <a href="mailto:privacy@solocare.com.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.com.au</a>.</p>
+            <p className="mt-2">To request deletion of your account and data, email <a href="mailto:privacy@solocare.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.au</a>.</p>
           </section>
 
           <section>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
               <li>Request deletion of your data</li>
               <li>Complain to the Office of the Australian Information Commissioner (OAIC) if you believe we've mishandled your data</li>
             </ul>
-            <p className="mt-3">To exercise any of these rights, email <a href="mailto:privacy@solocare.com.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.com.au</a>. We will respond within 30 days.</p>
+            <p className="mt-3">To exercise any of these rights, email <a href="mailto:privacy@solocare.au" className="text-[#1E3A5F] hover:underline">privacy@solocare.au</a>. We will respond within 30 days.</p>
           </section>
 
           <section>
