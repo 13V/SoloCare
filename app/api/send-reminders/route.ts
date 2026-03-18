@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://solocare.com.au";
 
 function getDaysUntil(dateStr: string): number {
@@ -85,6 +84,7 @@ export async function GET(request: NextRequest) {
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ error: "RESEND_API_KEY not configured" }, { status: 500 });
   }
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const supabase = await createClient();
 
