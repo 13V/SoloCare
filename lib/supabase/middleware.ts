@@ -51,7 +51,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Subscription check for app pages
+  // Onboarding + subscription gate for app pages
   if (user && !isPublicPath && pathname !== "/subscribe" && pathname !== "/onboarding" && pathname !== "/settings") {
     const { data: profile } = await supabase
       .from("profiles")
@@ -59,7 +59,15 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (profile?.onboarding_complete && profile?.subscription_status !== "active") {
+    // No profile or onboarding incomplete → force onboarding first
+    if (!profile?.onboarding_complete) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    // Onboarding done but no active subscription → force subscribe
+    if (profile.subscription_status !== "active") {
       const url = request.nextUrl.clone();
       url.pathname = "/subscribe";
       return NextResponse.redirect(url);
