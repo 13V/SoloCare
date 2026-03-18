@@ -132,11 +132,11 @@ export default function NewParticipantPage() {
                 onChange={(e) => handleChange("ndis_number", e.target.value)}
                 placeholder="43 000 000 0"
               />
-              <p className="text-xs text-[#64748B]">Format: XX XXX XXX XXX</p>
+              <p className="text-xs text-[#64748B]">Found on the participant&apos;s NDIS plan letter or at myplace.ndis.gov.au</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date_of_birth">Date of Birth</Label>
+              <Label htmlFor="date_of_birth">Date of Birth <span className="text-[#64748B] font-normal text-xs">(optional)</span></Label>
               <Input
                 id="date_of_birth"
                 type="date"
@@ -170,6 +170,7 @@ export default function NewParticipantPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-[#64748B]">Check the participant&apos;s plan letter — it will say who manages the funding</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -192,13 +193,14 @@ export default function NewParticipantPage() {
                 />
               </div>
             </div>
+            <p className="text-xs text-[#64748B]">These dates are printed on the participant&apos;s NDIS plan. You&apos;ll get a reminder before the plan expires.</p>
           </CardContent>
         </Card>
 
         {/* Emergency Contact */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Emergency Contact</CardTitle>
+            <CardTitle className="text-base">Emergency Contact <span className="text-[#64748B] font-normal text-sm">(optional)</span></CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

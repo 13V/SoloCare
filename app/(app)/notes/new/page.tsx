@@ -141,14 +141,14 @@ function NewNoteForm() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] font-heading">Add Progress Note</h1>
+          <h1 className="text-2xl font-bold text-[#0F172A] font-heading">Add Session Note</h1>
           <p className="text-sm text-[#64748B] mt-0.5">Document your support session</p>
         </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
         <p className="text-sm text-blue-800">
-          <strong>NDIS requirement:</strong> Progress notes must be completed after every support session. They demonstrate you are delivering supports in line with the participant&apos;s plan.
+          <strong>Required by the NDIS:</strong> You must write a note after every support session. These notes prove you delivered the support as agreed, and may be checked in an audit.
         </p>
       </div>
 
@@ -187,6 +187,7 @@ function NewNoteForm() {
                 onChange={(e) => handleChange("session_date", e.target.value)}
                 required
               />
+              <p className="text-xs text-[#64748B]">You can enter a past date if you&apos;re catching up on a previous session.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -227,6 +228,7 @@ function NewNoteForm() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-[#64748B]">This is the type of support from the participant&apos;s NDIS plan — e.g. Daily Activities covers help with meals, hygiene, and household tasks.</p>
             </div>
 
             {activeGoals.length > 0 && (
@@ -276,19 +278,20 @@ function NewNoteForm() {
                 id="what_happened"
                 value={form.what_happened}
                 onChange={(e) => handleChange("what_happened", e.target.value)}
-                placeholder="Describe the support provided during this session..."
+                placeholder="e.g. Assisted participant with meal preparation, personal hygiene, and a 20-minute walk to the local park. Participant was engaged and in good spirits throughout."
                 rows={4}
                 required
               />
+              <p className="text-xs text-[#64748B]">Describe what you did and how the participant engaged. Be specific — these notes may be reviewed in an audit.</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="goals_worked">Goals Worked Toward</Label>
+              <Label htmlFor="goals_worked">Goals Worked Toward <span className="text-[#64748B] font-normal text-xs">(optional)</span></Label>
               <Textarea
                 id="goals_worked"
                 value={form.goals_worked}
                 onChange={(e) => handleChange("goals_worked", e.target.value)}
-                placeholder="Which NDIS plan goals were worked on?"
+                placeholder="e.g. Increase independence with daily living tasks"
                 rows={3}
               />
             </div>

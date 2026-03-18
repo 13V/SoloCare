@@ -91,7 +91,7 @@ export default function LoginPage() {
       toast.error(error.message);
     } else {
       setMagicLinkSent(true);
-      toast.success("Magic link sent! Check your email.");
+      toast.success("Sign-in link sent! Check your email.");
     }
     setLoading(false);
   }
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 <div className="text-4xl mb-4">📧</div>
                 <h3 className="font-semibold text-[#0F172A] mb-2">Check your email</h3>
                 <p className="text-sm text-[#64748B]">
-                  We sent a magic link to <strong>{email}</strong>. Click it to sign in.
+                  We sent a sign-in link to <strong>{email}</strong>. Click it to sign in — no password needed.
                 </p>
                 <Button variant="link" className="mt-4" onClick={() => setMagicLinkSent(false)}>
                   Back to sign in
@@ -188,7 +188,7 @@ export default function LoginPage() {
                   onClick={handleMagicLink}
                   disabled={loading}
                 >
-                  Send magic link instead
+                  Email me a sign-in link instead
                 </Button>
 
                 <p className="text-center text-sm text-[#64748B]">

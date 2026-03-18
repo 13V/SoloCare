@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, NotebookPen, FileSpreadsheet, Settings } from "lucide-react";
+import { LayoutDashboard, Users, NotebookPen, FileSpreadsheet, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -9,7 +9,7 @@ const navItems = [
   { href: "/participants", label: "Participants", icon: Users },
   { href: "/notes", label: "Notes", icon: NotebookPen },
   { href: "/invoices", label: "Invoices", icon: FileSpreadsheet },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/incidents", label: "Incidents", icon: AlertTriangle },
 ];
 
 export function MobileNav() {
