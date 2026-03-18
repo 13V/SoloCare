@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
-import { Participant, ProgressNote, Shift, FUNDING_TYPE_LABELS } from "@/lib/types-features";
+import { Participant, ProgressNote, Shift, ParticipantBudget, FUNDING_TYPE_LABELS } from "@/lib/types-features";
+import { BudgetTracker } from "@/components/participants/BudgetTracker";
 
 function calcHours(start: string, end: string): number {
   const [sh, sm] = start.split(":").map(Number);
@@ -35,7 +36,7 @@ export default async function ParticipantDetailPage({
 
   const p = participant as Participant;
 
-  const [{ data: notesData }, { data: shiftsData }, { data: agreementData }] = await Promise.all([
+  const [{ data: notesData }, { data: shiftsData }, { data: agreementData }, { data: budgetsData }] = await Promise.all([
     supabase
       .from("progress_notes")
       .select("*")
@@ -56,10 +57,18 @@ export default async function ParticipantDetailPage({
       .eq("participant_id", id)
       .eq("user_id", user.id)
       .maybeSingle(),
+    supabase
+      .from("participant_budgets")
+      .select("*")
+      .eq("participant_id", id)
+      .eq("user_id", user.id)
+      .order("support_category", { ascending: true })
+      .limit(50),
   ]);
 
   const notes = (notesData || []) as ProgressNote[];
   const shifts = (shiftsData || []) as Shift[];
+  const budgets = (budgetsData || []) as ParticipantBudget[];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -224,7 +233,7 @@ export default async function ParticipantDetailPage({
       </div>
 
       {/* Plan Details */}
-      <Card className="border-slate-200">
+      <Card className="border-slate-200 mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Plan Details</CardTitle>
         </CardHeader>
@@ -279,6 +288,9 @@ export default async function ParticipantDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {/* NDIS Budget Tracker */}
+      <BudgetTracker initialBudgets={budgets} participantId={id} />
     </div>
   );
 }

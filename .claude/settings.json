@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \".claude/hooks/post-edit-format.js\"",
+            "timeout": 15
+          }
+        ],
+        "description": "Auto-format JS/TS files after edits (Biome or Prettier)"
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \".claude/hooks/post-edit-typecheck.js\"",
+            "timeout": 30
+          }
+        ],
+        "description": "TypeScript check after editing .ts/.tsx files"
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \".claude/hooks/post-edit-consolelog-warning.js\"",
+            "timeout": 10
+          }
+        ],
+        "description": "Warn about console.log statements in edited JS/TS files"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \".claude/hooks/pre-bash-git-push-reminder.js\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Remind to review changes before git push"
+      }
+    ]
+  }
+}

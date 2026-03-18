@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderLock, FileText, AlertTriangle, LogOut, Settings, Users, NotebookPen, Clock, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, FolderLock, FileText, AlertTriangle, LogOut, Settings, Users, NotebookPen, Clock, ClipboardCheck, FileSpreadsheet } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/participants", label: "Participants", icon: Users },
   { href: "/notes", label: "Progress Notes", icon: NotebookPen },
   { href: "/shifts", label: "Shifts", icon: Clock },
+  { href: "/invoices", label: "Invoices", icon: FileSpreadsheet },
   { href: "/checklist", label: "NDIS Checklist", icon: ClipboardCheck },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
