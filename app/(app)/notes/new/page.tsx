@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
-import { Participant, SUPPORT_CATEGORIES } from "@/lib/types-features";
+import { Participant, ParticipantGoal, SUPPORT_CATEGORIES } from "@/lib/types-features";
 
 function today() {
   return new Date().toISOString().split("T")[0];
@@ -29,6 +29,8 @@ function NewNoteForm() {
   const preselectedParticipantId = searchParams.get("participant_id") || "";
 
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [activeGoals, setActiveGoals] = useState<ParticipantGoal[]>([]);
+  const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     participant_id: preselectedParticipantId,
@@ -54,6 +56,33 @@ function NewNoteForm() {
     }
     loadParticipants();
   }, []);
+
+  useEffect(() => {
+    async function loadGoals() {
+      if (!form.participant_id) {
+        setActiveGoals([]);
+        setSelectedGoalIds([]);
+        return;
+      }
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("participant_goals")
+        .select("id, goal_description, category, status, user_id, participant_id, target_date, notes, created_at, updated_at")
+        .eq("participant_id", form.participant_id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      setActiveGoals((data || []) as ParticipantGoal[]);
+      setSelectedGoalIds([]);
+    }
+    loadGoals();
+  }, [form.participant_id]);
+
+  function toggleGoal(goalId: string) {
+    setSelectedGoalIds((prev) =>
+      prev.includes(goalId) ? prev.filter((id) => id !== goalId) : [...prev, goalId]
+    );
+  }
 
   function handleChange(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -89,14 +118,14 @@ function NewNoteForm() {
         goals_worked: form.goals_worked.trim() || null,
         participant_response: form.participant_response.trim() || null,
         follow_up: form.follow_up.trim() || null,
+        goal_ids: selectedGoalIds.length > 0 ? selectedGoalIds : [],
       });
 
       if (error) throw error;
 
       toast.success("Progress note saved");
       router.push("/notes");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to save progress note");
     } finally {
       setSaving(false);
@@ -199,6 +228,37 @@ function NewNoteForm() {
                 </SelectContent>
               </Select>
             </div>
+
+            {activeGoals.length > 0 && (
+              <div className="space-y-2">
+                <Label>Goals Worked on This Session</Label>
+                <div className="space-y-2">
+                  {activeGoals.map((goal) => (
+                    <label
+                      key={goal.id}
+                      className={`flex items-start gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                        selectedGoalIds.includes(goal.id)
+                          ? "border-[#1E3A5F] bg-[#1E3A5F]/5"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGoalIds.includes(goal.id)}
+                        onChange={() => toggleGoal(goal.id)}
+                        className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#1E3A5F]"
+                      />
+                      <span className="text-sm text-[#0F172A] flex-1">
+                        {goal.goal_description}
+                        {goal.category && (
+                          <span className="ml-2 text-xs text-[#64748B]">({goal.category})</span>
+                        )}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

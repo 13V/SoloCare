@@ -6,8 +6,83 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, ChevronDown } from "lucide-react";
 import { SUPPORT_CATEGORIES } from "@/lib/types-features";
+import { NDIS_RATES, NdisRate } from "@/lib/ndis-rates";
+
+const CATEGORY_TO_RATES: Record<string, NdisRate[]> = {
+  "Daily Activities": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("01_")),
+  "Social & Community Participation": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("04_")),
+  "Improved Living Arrangements": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("08_")),
+  "Increased Social & Community Participation": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("09_")),
+  "Finding & Keeping a Job": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("10_")),
+  "Improved Health & Wellbeing": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("11_")),
+  "Improved Daily Living": NDIS_RATES.filter((r) => r.supportItemNumber.startsWith("15_")),
+};
+
+function RateLookup({
+  category,
+  onSelectRate,
+}: {
+  category: string;
+  onSelectRate: (rate: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rates = CATEGORY_TO_RATES[category] ?? [];
+
+  if (!category || rates.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 text-xs text-[#1E3A5F] font-medium hover:underline whitespace-nowrap"
+      >
+        Rate lookup
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-20 top-full left-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg p-3 min-w-[260px]">
+          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-2">
+            2024-25 NDIS Rates — {category}
+          </p>
+          {rates.map((rate) => (
+            <div key={rate.supportItemNumber} className="mb-3 last:mb-0">
+              <p className="text-xs font-medium text-[#0F172A] mb-1">{rate.description}</p>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { label: "Weekday", value: rate.weekday },
+                  { label: "Eve / Night", value: rate.weekdayEvening },
+                  { label: "Saturday", value: rate.saturday },
+                  { label: "Sunday", value: rate.sunday },
+                  { label: "Public Holiday", value: rate.publicHoliday },
+                ].map(({ label, value }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => { onSelectRate(value); setOpen(false); }}
+                    className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg border border-slate-100 hover:border-[#1E3A5F] hover:bg-[#1E3A5F]/5 transition-colors text-left"
+                  >
+                    <span className="text-[#64748B]">{label}</span>
+                    <span className="font-semibold text-[#0F172A]">${value.toFixed(2)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="mt-2 text-xs text-[#64748B] hover:text-[#0F172A]"
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface ParticipantOption {
   id: string;
@@ -238,10 +313,7 @@ export function InvoiceForm({ participants }: Props) {
             {lineItems.map((item) => {
               const amount = calcAmount(item.hours, item.rate);
               return (
-                <div
-                  key={item.localId}
-                  className="grid sm:grid-cols-[1fr_1fr_80px_80px_80px_36px] gap-2 items-center"
-                >
+                <div key={item.localId} className="border border-slate-100 rounded-xl p-3 space-y-2 sm:space-y-0 sm:grid sm:grid-cols-[1fr_1fr_80px_80px_80px_36px] sm:gap-2 sm:items-center sm:border-0 sm:rounded-none sm:p-0">
                   <input
                     type="text"
                     placeholder="Description"
@@ -249,16 +321,22 @@ export function InvoiceForm({ participants }: Props) {
                     onChange={(e) => updateRow(item.localId, "description", e.target.value)}
                     className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 focus:border-[#1E3A5F] w-full"
                   />
-                  <select
-                    value={item.support_category}
-                    onChange={(e) => updateRow(item.localId, "support_category", e.target.value)}
-                    className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 focus:border-[#1E3A5F] w-full"
-                  >
-                    <option value="">No category</option>
-                    {SUPPORT_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  <div className="space-y-1">
+                    <select
+                      value={item.support_category}
+                      onChange={(e) => updateRow(item.localId, "support_category", e.target.value)}
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 focus:border-[#1E3A5F] w-full"
+                    >
+                      <option value="">No category</option>
+                      {SUPPORT_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                    <RateLookup
+                      category={item.support_category}
+                      onSelectRate={(rate) => updateRow(item.localId, "rate", rate.toFixed(2))}
+                    />
+                  </div>
                   <input
                     type="number"
                     placeholder="0"

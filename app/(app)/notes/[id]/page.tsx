@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
@@ -27,13 +27,29 @@ export default async function NoteDetailPage({
 
   if (!noteData) notFound();
 
-  const note = noteData as ProgressNote;
+  const note = noteData as ProgressNote & { goal_ids?: string[] };
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("business_name, contact_name, phone")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { data: goalsData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("business_name, contact_name, phone")
+      .eq("id", user.id)
+      .single(),
+    note.goal_ids && note.goal_ids.length > 0
+      ? supabase
+          .from("participant_goals")
+          .select("id, goal_description, category, participant_id")
+          .in("id", note.goal_ids)
+          .limit(50)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const linkedGoals = (goalsData ?? []) as Array<{
+    id: string;
+    goal_description: string;
+    category: string | null;
+    participant_id: string;
+  }>;
 
   const participantName = note.participants
     ? `${note.participants.first_name}${note.participants.last_name ? " " + note.participants.last_name : ""}`
@@ -128,6 +144,36 @@ export default async function NoteDetailPage({
               <p className="text-sm text-[#0F172A] leading-relaxed whitespace-pre-wrap">
                 {note.follow_up}
               </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {linkedGoals.length > 0 && (
+          <Card className="border-slate-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-[#64748B] uppercase tracking-wide flex items-center gap-2">
+                <Target className="h-3.5 w-3.5" />
+                Goals Worked On
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {linkedGoals.map((goal) => (
+                  <Link
+                    key={goal.id}
+                    href={`/participants/${goal.participant_id}`}
+                    className="flex items-start gap-2 p-2 rounded-lg border border-slate-100 hover:border-[#1E3A5F]/30 hover:bg-slate-50 transition-colors"
+                  >
+                    <Target className="h-3.5 w-3.5 text-[#64748B] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm text-[#0F172A]">{goal.goal_description}</p>
+                      {goal.category && (
+                        <p className="text-xs text-[#64748B] mt-0.5">{goal.category}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}

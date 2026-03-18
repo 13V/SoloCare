@@ -114,6 +114,49 @@ export function deriveInvoiceStatus(invoice: Pick<Invoice, "status" | "due_date"
   return invoice.status;
 }
 
+// ─── Worker Compliance ───────────────────────────────────────
+export interface WorkerDocument {
+  id: string;
+  user_id: string;
+  document_type: string;
+  document_name: string;
+  expiry_date: string | null;
+  issued_date: string | null;
+  notes: string | null;
+  status: "current" | "expired" | "expiring_soon";
+  created_at: string;
+  updated_at: string;
+}
+
+export const WORKER_DOCUMENT_TYPES = [
+  "Police Check",
+  "NDIS Worker Screening Check",
+  "Working With Children Check",
+  "First Aid Certificate",
+  "CPR Certificate",
+  "Public Liability Insurance",
+  "Professional Indemnity Insurance",
+  "ABN Registration",
+  "Driver's Licence",
+  "Vehicle Insurance",
+  "COVID-19 Vaccination",
+  "Other",
+];
+
+// ─── Participant Goals ────────────────────────────────────────
+export interface ParticipantGoal {
+  id: string;
+  user_id: string;
+  participant_id: string;
+  goal_description: string;
+  category: string | null;
+  target_date: string | null;
+  status: "active" | "achieved" | "discontinued";
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── Participant Budgets ─────────────────────────────────────
 export interface ParticipantBudget {
   id: string;

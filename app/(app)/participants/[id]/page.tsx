@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
-import { Participant, ProgressNote, Shift, ParticipantBudget, FUNDING_TYPE_LABELS } from "@/lib/types-features";
+import { Participant, ProgressNote, Shift, ParticipantBudget, ParticipantGoal, FUNDING_TYPE_LABELS } from "@/lib/types-features";
 import { BudgetTracker } from "@/components/participants/BudgetTracker";
+import { GoalTracker } from "@/components/participants/GoalTracker";
 
 function calcHours(start: string, end: string): number {
   const [sh, sm] = start.split(":").map(Number);
@@ -36,7 +37,7 @@ export default async function ParticipantDetailPage({
 
   const p = participant as Participant;
 
-  const [{ data: notesData }, { data: shiftsData }, { data: agreementData }, { data: budgetsData }] = await Promise.all([
+  const [{ data: notesData }, { data: shiftsData }, { data: agreementData }, { data: budgetsData }, { data: goalsData }] = await Promise.all([
     supabase
       .from("progress_notes")
       .select("*")
@@ -64,11 +65,19 @@ export default async function ParticipantDetailPage({
       .eq("user_id", user.id)
       .order("support_category", { ascending: true })
       .limit(50),
+    supabase
+      .from("participant_goals")
+      .select("id, user_id, participant_id, goal_description, category, target_date, status, notes, created_at, updated_at")
+      .eq("participant_id", id)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
 
   const notes = (notesData || []) as ProgressNote[];
   const shifts = (shiftsData || []) as Shift[];
   const budgets = (budgetsData || []) as ParticipantBudget[];
+  const goals = (goalsData || []) as ParticipantGoal[];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -291,6 +300,9 @@ export default async function ParticipantDetailPage({
 
       {/* NDIS Budget Tracker */}
       <BudgetTracker initialBudgets={budgets} participantId={id} />
+
+      {/* NDIS Goal Tracker */}
+      <GoalTracker initialGoals={goals} participantId={id} />
     </div>
   );
 }

@@ -15,9 +15,10 @@ export default async function IncidentsPage() {
 
   const { data: incidents } = await supabase
     .from("incidents")
-    .select("*")
+    .select("id, incident_date, incident_time, incident_type, participant_first_name, location, reported_to_ndis, created_at, is_reportable, ndis_notified_at, notification_due_at")
     .eq("user_id", user.id)
-    .order("incident_date", { ascending: false });
+    .order("incident_date", { ascending: false })
+    .limit(200);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -95,6 +96,11 @@ export default async function IncidentsPage() {
                       <Badge variant={incident.reported_to_ndis ? "valid" : "warning"} className="text-xs whitespace-nowrap">
                         {incident.reported_to_ndis ? "Reported" : "Not Reported"}
                       </Badge>
+                      {incident.is_reportable && !incident.ndis_notified_at && incident.notification_due_at && (
+                        <Badge variant="expired" className="text-xs whitespace-nowrap">
+                          Report due
+                        </Badge>
+                      )}
                       <span className="text-xs text-slate-400 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {formatDate(incident.created_at)}

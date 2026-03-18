@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SubscribedToast } from "./SubscribedToast";
-import { FolderLock, FileText, AlertTriangle, ArrowRight, Clock, Settings, CheckCircle2, Circle } from "lucide-react";
+import { FolderLock, FileText, AlertTriangle, ArrowRight, Clock, Settings, CheckCircle2, Circle, ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getDocumentStatus, formatDate } from "@/lib/utils";
 import { POLICY_LABELS } from "@/lib/types";
+import { calculateAuditScore } from "@/lib/audit-score";
 
 const REQUIRED_DOC_TYPES = ["worker_screening", "police_check", "insurance"];
 const POLICY_TYPES = ["incident_management", "complaints", "risk", "code_of_conduct"];
@@ -64,6 +65,8 @@ export default async function DashboardPage() {
 
   if (!profile?.onboarding_complete) redirect("/onboarding");
 
+  const auditResult = await calculateAuditScore(user.id);
+
   // Score calculation — 7 total checkpoints: 3 required docs + 4 policies
   const docPoints = REQUIRED_DOC_TYPES.reduce((acc, reqType) => {
     const doc = documents?.find((d) => d.document_type === reqType);
@@ -113,6 +116,56 @@ export default async function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Audit Score Widget */}
+      {(() => {
+        const bandStyles: Record<string, { bg: string; text: string; ringColour: string; badge: string }> = {
+          green: { bg: "bg-green-50 border-green-200", text: "text-green-700", ringColour: "#16A34A", badge: "bg-green-100 text-green-700" },
+          blue: { bg: "bg-blue-50 border-blue-200", text: "text-blue-700", ringColour: "#2563EB", badge: "bg-blue-100 text-blue-700" },
+          amber: { bg: "bg-amber-50 border-amber-200", text: "text-amber-700", ringColour: "#D97706", badge: "bg-amber-100 text-amber-700" },
+          red: { bg: "bg-red-50 border-red-200", text: "text-red-700", ringColour: "#DC2626", badge: "bg-red-100 text-red-700" },
+        };
+        const s = bandStyles[auditResult.bandColour];
+        const radius = 28;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (auditResult.score / 100) * circumference;
+        return (
+          <div className={`rounded-xl border p-4 mb-4 ${s.bg}`}>
+            <div className="flex items-center gap-4">
+              <div className="relative inline-flex items-center justify-center shrink-0">
+                <svg width="72" height="72" className="-rotate-90">
+                  <circle cx="36" cy="36" r={radius} fill="none" stroke="#E2E8F0" strokeWidth="8" />
+                  <circle
+                    cx="36" cy="36" r={radius} fill="none"
+                    stroke={s.ringColour} strokeWidth="8"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute text-center">
+                  <span className="text-lg font-bold" style={{ color: s.ringColour }}>{auditResult.score}</span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <ClipboardCheck className={`h-4 w-4 shrink-0 ${s.text}`} />
+                  <span className={`text-sm font-bold ${s.text}`}>{auditResult.band}</span>
+                </div>
+                <p className="text-xs text-[#64748B]">
+                  {auditResult.categories.reduce((sum, c) => sum + c.earned, 0)}/
+                  {auditResult.categories.reduce((sum, c) => sum + c.possible, 0)} compliance points earned
+                </p>
+              </div>
+              <Link href="/audit" className="shrink-0">
+                <Button size="sm" variant="outline" className={`text-xs border-current ${s.text}`}>
+                  Full report
+                </Button>
+              </Link>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Daily quick actions */}
       <div className="grid grid-cols-2 gap-3 mb-5">

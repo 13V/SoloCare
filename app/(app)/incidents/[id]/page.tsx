@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { INCIDENT_TYPE_LABELS } from "@/lib/types";
 import { IncidentPDFDownload } from "./IncidentPDFDownload";
+import { ReportingTracker } from "@/components/incidents/ReportingTracker";
 
 export default async function IncidentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -107,7 +108,7 @@ export default async function IncidentDetailPage({ params }: { params: Promise<{
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200">
+      <Card className="border-slate-200 mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Immediate Action Taken</CardTitle>
         </CardHeader>
@@ -115,6 +116,19 @@ export default async function IncidentDetailPage({ params }: { params: Promise<{
           <p className="text-sm text-[#0F172A] leading-relaxed whitespace-pre-wrap">{incident.immediate_action}</p>
         </CardContent>
       </Card>
+
+      <ReportingTracker
+        incidentId={incident.id}
+        incidentDate={incident.incident_date}
+        initial={{
+          is_reportable: incident.is_reportable ?? false,
+          reportable_type: incident.reportable_type ?? null,
+          ndis_notified_at: incident.ndis_notified_at ?? null,
+          notification_due_at: incident.notification_due_at ?? null,
+          notification_outcome: incident.notification_outcome ?? null,
+          notification_reference: incident.notification_reference ?? null,
+        }}
+      />
     </div>
   );
 }
