@@ -4,12 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const baseUrl = forwardedHost ? `https://${forwardedHost}` : origin;
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Check if onboarding is complete
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -19,12 +20,12 @@ export async function GET(request: NextRequest) {
           .single();
 
         if (!profile?.onboarding_complete) {
-          return NextResponse.redirect(`${origin}/onboarding`);
+          return NextResponse.redirect(`${baseUrl}/onboarding`);
         }
       }
-      return NextResponse.redirect(`${origin}/dashboard`);
+      return NextResponse.redirect(`${baseUrl}/dashboard`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(`${baseUrl}/login?error=auth_failed`);
 }
