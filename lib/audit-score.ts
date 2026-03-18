@@ -30,6 +30,7 @@ export async function calculateAuditScore(userId: string): Promise<AuditScoreRes
     { data: activeParticipants },
     { data: notesByParticipant },
     { data: agreements },
+    { data: workerDocs },
   ] = await Promise.all([
     supabase
       .from("policies")
@@ -69,6 +70,11 @@ export async function calculateAuditScore(userId: string): Promise<AuditScoreRes
       .select("id")
       .eq("user_id", userId)
       .limit(10),
+    supabase
+      .from("worker_documents")
+      .select("id, expiry_date, status, document_type")
+      .eq("user_id", userId)
+      .limit(100),
   ]);
 
   const policyCount = policies?.length ?? 0;
@@ -173,9 +179,49 @@ export async function calculateAuditScore(userId: string): Promise<AuditScoreRes
     agreementsActions.push("Generate a service agreement for at least 1 participant");
   }
 
+  // ─── Worker Credentials (20 pts) ─────────────────────────────
+  let credentialsEarned = 0;
+  const credentialsActions: string[] = [];
+
+  const workerDocCount = workerDocs?.length ?? 0;
+  if (workerDocCount >= 1) {
+    const expiredCreds = workerDocs?.filter(
+      (d) => d.expiry_date && new Date(d.expiry_date) < now
+    ) ?? [];
+    const expiringSoonCreds = workerDocs?.filter(
+      (d) =>
+        d.expiry_date &&
+        new Date(d.expiry_date) >= now &&
+        new Date(d.expiry_date) <= thirtyDaysFromNow
+    ) ?? [];
+
+    if (expiredCreds.length === 0 && expiringSoonCreds.length === 0) {
+      credentialsEarned = 20;
+    } else if (expiredCreds.length === 0) {
+      credentialsEarned = 10;
+      credentialsActions.push(
+        `${expiringSoonCreds.length} credential${expiringSoonCreds.length > 1 ? "s" : ""} expiring within 30 days — renew ${expiringSoonCreds.length > 1 ? "them" : "it"} in My Compliance`
+      );
+    } else {
+      credentialsEarned = 5;
+      credentialsActions.push(
+        `${expiredCreds.length} credential${expiredCreds.length > 1 ? "s" : ""} expired — renew ${expiredCreds.length > 1 ? "them" : "it"} in My Compliance`
+      );
+      if (expiringSoonCreds.length > 0) {
+        credentialsActions.push(
+          `${expiringSoonCreds.length} credential${expiringSoonCreds.length > 1 ? "s" : ""} expiring within 30 days`
+        );
+      }
+    }
+  } else {
+    credentialsActions.push(
+      "Add your credentials to My Compliance — police check, WWCC, first aid, and insurance are required for NDIS work"
+    );
+  }
+
   // ─── Total ───────────────────────────────────────────────────
-  const total = policiesEarned + docsEarned + incidentsEarned + notesEarned + agreementsEarned;
-  const possible = 25 + 20 + 20 + 20 + 15;
+  const total = policiesEarned + docsEarned + incidentsEarned + notesEarned + agreementsEarned + credentialsEarned;
+  const possible = 25 + 20 + 20 + 20 + 15 + 20;
   const score = Math.round((total / possible) * 100);
 
   let band: AuditScoreResult["band"];
@@ -201,6 +247,7 @@ export async function calculateAuditScore(userId: string): Promise<AuditScoreRes
     categories: [
       { label: "Policies", earned: policiesEarned, possible: 25, actions: policiesActions },
       { label: "Compliance Vault", earned: docsEarned, possible: 20, actions: docsActions },
+      { label: "Worker Credentials", earned: credentialsEarned, possible: 20, actions: credentialsActions },
       { label: "Incidents", earned: incidentsEarned, possible: 20, actions: incidentsActions },
       { label: "Progress Notes", earned: notesEarned, possible: 20, actions: notesActions },
       { label: "Service Agreements", earned: agreementsEarned, possible: 15, actions: agreementsActions },
