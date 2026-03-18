@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, NotebookPen, Clock, ChevronRight } from "lucide-react";
+import { Plus, NotebookPen, Clock, ChevronRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { ProgressNote } from "@/lib/types-features";
+import { ProgressNote, Participant } from "@/lib/types-features";
 
 function initials(name: string) {
   return name
@@ -41,7 +41,6 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-// Group notes by month label
 function groupByMonth(notes: ProgressNote[]) {
   const groups: { label: string; notes: ProgressNote[] }[] = [];
   let current: { label: string; notes: ProgressNote[] } | null = null;
@@ -67,148 +66,194 @@ export default async function NotesPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  let query = supabase
-    .from("progress_notes")
-    .select("*, participants(first_name, last_name)")
-    .eq("user_id", user.id)
-    .order("session_date", { ascending: false });
-
+  // ── Participant selected: show their notes ──────────────────────────────
   if (participant_id) {
-    query = query.eq("participant_id", participant_id);
+    const [notesResult, participantResult] = await Promise.all([
+      supabase
+        .from("progress_notes")
+        .select("*, participants(first_name, last_name)")
+        .eq("user_id", user.id)
+        .eq("participant_id", participant_id)
+        .order("session_date", { ascending: false }),
+      supabase
+        .from("participants")
+        .select("first_name, last_name")
+        .eq("id", participant_id)
+        .eq("user_id", user.id)
+        .single(),
+    ]);
+
+    const notes = (notesResult.data || []) as ProgressNote[];
+    const participant = participantResult.data;
+    const participantName = participant
+      ? `${participant.first_name}${participant.last_name ? " " + participant.last_name : ""}`
+      : "Participant";
+    const groups = groupByMonth(notes);
+
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Link href="/notes" className="text-sm text-[#64748B] hover:text-[#1E3A5F] transition-colors">
+                Notes
+              </Link>
+              <span className="text-slate-300">/</span>
+              <span className="text-sm font-medium text-[#0F172A]">{participantName}</span>
+            </div>
+            <h1 className="text-2xl font-bold text-[#0F172A] font-heading">{participantName}</h1>
+            <p className="text-sm text-[#64748B] mt-0.5">
+              {notes.length === 0 ? "No notes yet" : `${notes.length} note${notes.length !== 1 ? "s" : ""}`}
+            </p>
+          </div>
+          <Link href={`/notes/new?participant_id=${participant_id}`}>
+            <Button className="bg-[#1E3A5F] hover:bg-[#2D5A8E] gap-2">
+              <Plus className="h-4 w-4" />
+              Add Note
+            </Button>
+          </Link>
+        </div>
+
+        {notes.length === 0 ? (
+          <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1E3A5F]/8 rounded-2xl mb-5">
+              <NotebookPen className="h-8 w-8 text-[#1E3A5F]" />
+            </div>
+            <h3 className="font-semibold text-[#0F172A] text-base mb-2">No notes for {participantName} yet</h3>
+            <p className="text-sm text-[#64748B] mb-6 max-w-sm mx-auto">
+              Progress notes are an NDIS legal requirement after each support session.
+            </p>
+            <Link href={`/notes/new?participant_id=${participant_id}`}>
+              <Button className="bg-[#1E3A5F] hover:bg-[#2D5A8E]">Add first note</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {groups.map((group) => (
+              <div key={group.label}>
+                <p className="text-xs font-semibold text-[#64748B] uppercase tracking-widest mb-3 pl-1">
+                  {group.label}
+                </p>
+                <div className="space-y-2">
+                  {group.notes.map((note) => {
+                    const duration = calcDuration(note.session_start, note.session_end);
+                    return (
+                      <Link key={note.id} href={`/notes/${note.id}`} className="block group">
+                        <div className="bg-white rounded-xl border border-slate-200 hover:border-[#1E3A5F]/40 hover:shadow-sm transition-all p-4 flex items-center gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs text-[#64748B]">
+                                {new Date(note.session_date + "T00:00:00").toLocaleDateString("en-AU", {
+                                  weekday: "short", day: "numeric", month: "short",
+                                })}
+                              </span>
+                              {note.support_category && (
+                                <span className="text-[10px] font-medium text-[#64748B] bg-slate-100 rounded-full px-2 py-0.5 hidden sm:inline">
+                                  {note.support_category}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-[#0F172A] line-clamp-1 leading-relaxed font-medium">
+                              {note.what_happened}
+                            </p>
+                          </div>
+                          <div className="shrink-0 flex items-center gap-2">
+                            {duration && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#1E3A5F] bg-blue-50 rounded-full px-2 py-0.5">
+                                <Clock className="h-2.5 w-2.5" />
+                                {duration}
+                              </span>
+                            )}
+                            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#1E3A5F] transition-colors" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   }
 
-  const { data: notesData } = await query;
-
-  const notes = (notesData || []) as ProgressNote[];
-  const groups = groupByMonth(notes);
-
-  // Resolve participant name for filtered view
-  let participantName: string | null = null;
-  if (participant_id && notes.length > 0 && notes[0].participants) {
-    const p = notes[0].participants;
-    participantName = `${p.first_name}${p.last_name ? " " + p.last_name : ""}`;
-  } else if (participant_id && notes.length === 0) {
-    const { data: pData } = await supabase
+  // ── No participant selected: show participant picker ────────────────────
+  const [participantsResult, notesCountResult] = await Promise.all([
+    supabase
       .from("participants")
-      .select("first_name, last_name")
-      .eq("id", participant_id)
+      .select("id, first_name, last_name, active")
       .eq("user_id", user.id)
-      .single();
-    if (pData) participantName = `${pData.first_name}${pData.last_name ? " " + pData.last_name : ""}`;
+      .eq("active", true)
+      .order("first_name"),
+    supabase
+      .from("progress_notes")
+      .select("participant_id")
+      .eq("user_id", user.id),
+  ]);
+
+  const participants = (participantsResult.data || []) as Pick<Participant, "id" | "first_name" | "last_name" | "active">[];
+  const allNotes = notesCountResult.data || [];
+
+  // Count notes per participant
+  const noteCountMap: Record<string, number> = {};
+  for (const n of allNotes) {
+    if (n.participant_id) {
+      noteCountMap[n.participant_id] = (noteCountMap[n.participant_id] || 0) + 1;
+    }
   }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#0F172A] font-heading">Progress Notes</h1>
-          <p className="text-sm text-[#64748B] mt-1">
-            {participant_id && participantName
-              ? `Showing notes for ${participantName}`
-              : notes.length === 0
-              ? "No notes yet"
-              : `${notes.length} note${notes.length !== 1 ? "s" : ""} recorded`}
-          </p>
-          {participant_id && (
-            <Link href="/notes" className="text-xs text-[#1E3A5F] hover:underline mt-0.5 inline-block">
-              View all notes
-            </Link>
-          )}
+          <p className="text-sm text-[#64748B] mt-1">Select a participant to view or add notes</p>
         </div>
-        <Link href={participant_id ? `/notes/new?participant_id=${participant_id}` : "/notes/new"}>
-          <Button className="bg-[#1E3A5F] hover:bg-[#2D5A8E] gap-2">
-            <Plus className="h-4 w-4" />
-            Add Note
-          </Button>
-        </Link>
       </div>
 
-      {notes.length === 0 ? (
+      {participants.length === 0 ? (
         <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1E3A5F]/8 rounded-2xl mb-5">
-            <NotebookPen className="h-8 w-8 text-[#1E3A5F]" />
+            <Users className="h-8 w-8 text-[#1E3A5F]" />
           </div>
-          <h3 className="font-semibold text-[#0F172A] text-base mb-2">No progress notes yet</h3>
-          <p className="text-sm text-[#64748B] mb-2 max-w-sm mx-auto">
-            Progress notes are an NDIS legal requirement after each support session.
+          <h3 className="font-semibold text-[#0F172A] text-base mb-2">No participants yet</h3>
+          <p className="text-sm text-[#64748B] mb-6 max-w-sm mx-auto">
+            Add a participant first, then you can write progress notes for them.
           </p>
-          <p className="text-xs text-[#64748B] mb-6 max-w-sm mx-auto">
-            They may be audited by the NDIS Commission — keep them detailed.
-          </p>
-          <Link href="/notes/new">
-            <Button className="bg-[#1E3A5F] hover:bg-[#2D5A8E]">Add your first note</Button>
+          <Link href="/participants/new">
+            <Button className="bg-[#1E3A5F] hover:bg-[#2D5A8E]">Add participant</Button>
           </Link>
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <div key={group.label}>
-              {/* Month label */}
-              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-widest mb-3 pl-1">
-                {group.label}
-              </p>
-
-              <div className="space-y-2">
-                {group.notes.map((note) => {
-                  const participantName = note.participants
-                    ? `${note.participants.first_name}${note.participants.last_name ? " " + note.participants.last_name : ""}`
-                    : "Unknown";
-
-                  const duration = calcDuration(note.session_start, note.session_end);
-                  const timeLabel = note.session_start
-                    ? note.session_start.slice(0, 5) + (note.session_end ? ` – ${note.session_end.slice(0, 5)}` : "")
-                    : null;
-
-                  const colorClass = avatarColor(participantName);
-
-                  return (
-                    <Link key={note.id} href={`/notes/${note.id}`} className="block group">
-                      <div className="bg-white rounded-xl border border-slate-200 hover:border-[#1E3A5F]/40 hover:shadow-sm transition-all p-4 flex items-center gap-4">
-                        {/* Avatar */}
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${colorClass}`}>
-                          {initials(participantName)}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm text-[#0F172A]">{participantName}</span>
-                            {note.support_category && (
-                              <span className="text-[10px] font-medium text-[#64748B] bg-slate-100 rounded-full px-2 py-0.5 hidden sm:inline">
-                                {note.support_category}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-[#64748B] line-clamp-1 leading-relaxed">
-                            {note.what_happened}
-                          </p>
-                        </div>
-
-                        {/* Right meta */}
-                        <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                          <span className="text-xs text-[#64748B]">
-                            {new Date(note.session_date + "T00:00:00").toLocaleDateString("en-AU", {
-                              day: "numeric",
-                              month: "short",
-                            })}
-                          </span>
-                          {duration && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#1E3A5F] bg-blue-50 rounded-full px-2 py-0.5">
-                              <Clock className="h-2.5 w-2.5" />
-                              {duration}
-                            </span>
-                          )}
-                        </div>
-
-                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#1E3A5F] transition-colors shrink-0" />
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {participants.map((p) => {
+            const name = `${p.first_name}${p.last_name ? " " + p.last_name : ""}`;
+            const count = noteCountMap[p.id] || 0;
+            const colorClass = avatarColor(name);
+            return (
+              <Link key={p.id} href={`/notes?participant_id=${p.id}`} className="block group">
+                <div className="bg-white rounded-xl border border-slate-200 hover:border-[#1E3A5F]/40 hover:shadow-sm transition-all p-4 flex items-center gap-4">
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${colorClass}`}>
+                    {initials(name)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-[#0F172A] text-sm">{name}</p>
+                    <p className="text-xs text-[#64748B] mt-0.5">
+                      {count === 0 ? "No notes yet" : `${count} note${count !== 1 ? "s" : ""}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-[#1E3A5F]/8 flex items-center justify-center group-hover:bg-[#1E3A5F]/16 transition-colors">
+                      <Plus className="h-3.5 w-3.5 text-[#1E3A5F]" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#1E3A5F] transition-colors" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
