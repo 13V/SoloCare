@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Onboarding + subscription gate for app pages
-  if (user && !isPublicPath && pathname !== "/subscribe" && pathname !== "/onboarding" && pathname !== "/settings") {
+  if (user && !isPublicPath && pathname !== "/subscribe" && pathname !== "/onboarding" && pathname !== "/settings" && !pathname.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("subscription_status, onboarding_complete")
