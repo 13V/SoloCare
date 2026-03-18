@@ -102,7 +102,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm sm:max-w-md">
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 mb-4">
-            <Image src="/solocare_lockup.svg" alt="SoloCare" width={160} height={53} className="h-9 w-auto" priority />
+            <Image src="/solocare_lockup.svg" alt="SoloCare" width={160} height={53} className="h-14 w-auto" priority />
           </Link>
         </div>
 
