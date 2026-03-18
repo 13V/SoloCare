@@ -32,7 +32,7 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-56 lg:w-60 min-h-screen bg-[#1E3A5F] text-white shrink-0">
       <div className="px-4 py-1 border-b border-white/10 bg-white">
-        <Image src="/solocare_lockup.svg" alt="SoloCare" width={180} height={60} className="h-20 w-auto" priority />
+        <Image src="/solocare_lockup.svg" alt="SoloCare" width={180} height={60} className="h-10 w-auto" priority />
       </div>
 
       <nav className="flex-1 px-3 py-3 space-y-0.5">

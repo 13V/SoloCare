@@ -9,7 +9,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/">
+          <Link href="/" className="shrink-0">
             <Image src="/solocare_lockup.svg" alt="SoloCare" width={160} height={53} className="h-9 w-auto" priority />
           </Link>
           <div className="flex items-center gap-2">
