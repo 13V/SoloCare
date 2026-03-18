@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
+  const stripe = getStripe();
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get("session_id");
 

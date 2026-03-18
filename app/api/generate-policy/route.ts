@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 
-const client = new Anthropic();
 
 const POLICY_PROMPTS: Record<string, string> = {
   incident_management: `Generate a professional, audit-ready Incident Management Policy for an NDIS registered provider.
@@ -86,6 +85,7 @@ Return well-structured markdown only. No preamble. Professional language. Do NOT
 
 export async function POST(request: NextRequest) {
   try {
+    const client = new Anthropic();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
